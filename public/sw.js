@@ -2,7 +2,7 @@
 // PTA Dex Service Worker — network-first + cache fallback
 // ============================================================
 
-const CACHE_NAME = 'pta3-dex-v2';
+const CACHE_NAME = 'pta3.5-dex-v1';
 const PRECACHE_URLS = ['./', './index.html'];
 
 // ── Install ────────────────────────────────────────────────

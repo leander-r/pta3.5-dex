@@ -3,8 +3,8 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // GitHub repo name: pta3-dex
-  base: process.env.NODE_ENV === 'production' ? '/pta3-dex/' : '/',
+  // GitHub repo name: pta3.5-dex
+  base: process.env.NODE_ENV === 'production' ? '/pta3.5-dex/' : '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',

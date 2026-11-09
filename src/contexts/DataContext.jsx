@@ -50,7 +50,7 @@ export const DataProvider = ({ children }) => {
     // Save slots — 3 named snapshot slots persisted to localStorage
     const [saveSlots, setSaveSlots] = useState(() => {
         try {
-            const raw = localStorage.getItem('pta3-save-slots');
+            const raw = localStorage.getItem('pta35-save-slots');
             if (raw) return JSON.parse(raw);
         } catch {}
         return [null, null, null];
@@ -59,7 +59,7 @@ export const DataProvider = ({ children }) => {
     // Discord webhook state
     const [discordWebhook, setDiscordWebhook] = useState(() => {
         try {
-            const saved = localStorage.getItem('pta3-discord-webhook');
+            const saved = localStorage.getItem('pta35-discord-webhook');
             return saved ? JSON.parse(saved) : { url: '', enabled: false, showSettings: false };
         } catch {
             return { url: '', enabled: false, showSettings: false };
@@ -75,7 +75,7 @@ export const DataProvider = ({ children }) => {
     // Save Discord webhook settings
     useEffect(() => {
         try {
-            localStorage.setItem('pta3-discord-webhook', JSON.stringify({
+            localStorage.setItem('pta35-discord-webhook', JSON.stringify({
                 url: discordWebhook.url,
                 enabled: discordWebhook.enabled,
                 showSettings: false
@@ -98,12 +98,12 @@ export const DataProvider = ({ children }) => {
             try {
                 let prev;
                 if (window.storage) {
-                    const result = await window.storage.get('pta3-save-data');
+                    const result = await window.storage.get('pta35-save-data');
                     prev = result?.value;
                 } else {
-                    prev = localStorage.getItem('pta3-save-data');
+                    prev = localStorage.getItem('pta35-save-data');
                 }
-                if (prev) localStorage.setItem('pta3-auto-backup', prev);
+                if (prev) localStorage.setItem('pta35-auto-backup', prev);
             } catch {}
 
             const savePayload = {
@@ -122,10 +122,10 @@ export const DataProvider = ({ children }) => {
             let saveSuccess = false;
 
             if (window.storage) {
-                const result = await window.storage.set('pta3-save-data', JSON.stringify(savePayload));
+                const result = await window.storage.set('pta35-save-data', JSON.stringify(savePayload));
                 saveSuccess = !!result;
             } else {
-                saveSuccess = safeLocalStorageSet('pta3-save-data', savePayload);
+                saveSuccess = safeLocalStorageSet('pta35-save-data', savePayload);
             }
 
             if (saveSuccess) {
@@ -230,7 +230,7 @@ export const DataProvider = ({ children }) => {
 
             if (window.storage) {
                 try {
-                    const result = await window.storage.get('pta3-save-data');
+                    const result = await window.storage.get('pta35-save-data');
                     if (result && result.value) {
                         loadedData = JSON.parse(result.value);
                     }
@@ -240,7 +240,7 @@ export const DataProvider = ({ children }) => {
             }
 
             if (!loadedData) {
-                loadedData = safeLocalStorageGet('pta3-save-data', null);
+                loadedData = safeLocalStorageGet('pta35-save-data', null);
             }
 
             // One-time migration: pick up existing saves stored under the old key name
@@ -249,7 +249,7 @@ export const DataProvider = ({ children }) => {
                 if (legacy && typeof legacy === 'object') {
                     loadedData = legacy;
                     // Persist under new key immediately; old key is left in place (harmless)
-                    try { safeLocalStorageSet('pta3-save-data', legacy); } catch {}
+                    try { safeLocalStorageSet('pta35-save-data', legacy); } catch {}
                 }
             }
 
@@ -277,7 +277,7 @@ export const DataProvider = ({ children }) => {
                     toast.info('Save data migrated to PTA3 format. Please review your trainer stats.');
                     // Persist the migration immediately so it does not re-trigger on next load
                     try {
-                        safeLocalStorageSet('pta3-save-data', pta3Data);
+                        safeLocalStorageSet('pta35-save-data', pta3Data);
                     } catch {}
                 }
 
@@ -289,7 +289,7 @@ export const DataProvider = ({ children }) => {
                     migratedData = cleanedData;
                     // Persist immediately so old features don't reappear
                     try {
-                        safeLocalStorageSet('pta3-save-data', cleanedData);
+                        safeLocalStorageSet('pta35-save-data', cleanedData);
                     } catch {}
                 }
 
@@ -298,7 +298,7 @@ export const DataProvider = ({ children }) => {
                 if (wasStatFixed) {
                     migratedData = statFixedData;
                     try {
-                        safeLocalStorageSet('pta3-save-data', statFixedData);
+                        safeLocalStorageSet('pta35-save-data', statFixedData);
                     } catch {}
                 }
 
@@ -321,7 +321,7 @@ export const DataProvider = ({ children }) => {
 
             // Backup reminder — nudge after 7 days without export
             try {
-                const lastBackup = parseInt(localStorage.getItem('pta3-last-backup') || '0');
+                const lastBackup = parseInt(localStorage.getItem('pta35-last-backup') || '0');
                 const daysSince = lastBackup ? Math.floor((Date.now() - lastBackup) / MS_PER_DAY) : -1;
                 if (daysSince > BACKUP_REMINDER_DAYS) {
                     setTimeout(() => toast.info(`It's been ${daysSince} days since your last backup. Consider exporting your data!`), 3000);
@@ -344,7 +344,7 @@ export const DataProvider = ({ children }) => {
             confirmLabel: 'Restore',
             onConfirm: () => {
                 try {
-                    const backup = localStorage.getItem('pta3-auto-backup');
+                    const backup = localStorage.getItem('pta35-auto-backup');
                     if (!backup) {
                         toast.warning('No auto-backup found. Save at least once to create a backup snapshot.');
                         return;
@@ -401,7 +401,7 @@ export const DataProvider = ({ children }) => {
     const persistSlots = useCallback((slots) => {
         setSaveSlots(slots);
         try {
-            localStorage.setItem('pta3-save-slots', JSON.stringify(slots));
+            localStorage.setItem('pta35-save-slots', JSON.stringify(slots));
         } catch {
             toast.error('Could not save slot data. Check your browser storage.');
         }
@@ -564,7 +564,7 @@ export const DataProvider = ({ children }) => {
         a.download = `pta3-all-trainers-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        try { localStorage.setItem('pta3-last-backup', Date.now().toString()); } catch {}
+        try { localStorage.setItem('pta35-last-backup', Date.now().toString()); } catch {}
     }, [trainers, activeTrainerId, inventory, customSpecies, customMoves, customOrigins, npcs]);
 
     // Export single trainer (no global inventory — use exportAllData for that)

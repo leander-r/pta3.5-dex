@@ -10,7 +10,7 @@ import toast from '../utils/toast.js';
 export const useDiscordWebhook = () => {
     const [webhook, setWebhook] = useState(() => {
         try {
-            const saved = localStorage.getItem('pta3-discord-webhook');
+            const saved = localStorage.getItem('pta35-discord-webhook');
             return saved ? JSON.parse(saved) : { url: '', enabled: false, showSettings: false };
         } catch {
             return { url: '', enabled: false, showSettings: false };
@@ -19,7 +19,7 @@ export const useDiscordWebhook = () => {
 
     useEffect(() => {
         try {
-            localStorage.setItem('pta3-discord-webhook', JSON.stringify({
+            localStorage.setItem('pta35-discord-webhook', JSON.stringify({
                 url: webhook.url,
                 enabled: webhook.enabled,
                 showSettings: false,

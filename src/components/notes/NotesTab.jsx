@@ -29,13 +29,13 @@ const NotesTab = () => {
     // Quest log state
     const [newQuestTitle, setNewQuestTitle] = useState('');
     const [expandedQuestId, setExpandedQuestId] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('pta3-expanded-quest-id')); } catch { return null; }
+        try { return JSON.parse(localStorage.getItem('pta35-expanded-quest-id')); } catch { return null; }
     });
 
     const handleExpandQuest = (id) => {
         const next = expandedQuestId === id ? null : id;
         setExpandedQuestId(next);
-        try { localStorage.setItem('pta3-expanded-quest-id', JSON.stringify(next)); } catch { /* quota */ }
+        try { localStorage.setItem('pta35-expanded-quest-id', JSON.stringify(next)); } catch { /* quota */ }
     };
     const quests = trainer.quests || [];
 

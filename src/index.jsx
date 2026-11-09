@@ -13,7 +13,7 @@ import './styles/global.css';
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register(
-            import.meta.env.PROD ? '/pta3-dex/sw.js' : '/sw.js'
+            import.meta.env.PROD ? '/pta3.5-dex/sw.js' : '/sw.js'
         ).catch(() => {});
     });
 }

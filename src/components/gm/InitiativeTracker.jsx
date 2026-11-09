@@ -14,7 +14,7 @@ import { getTypeColor, getContrastTextColor } from '../../utils/typeUtils.js';
 import { getActualStats, calculatePokemonHP } from '../../utils/dataUtils.js';
 import toast from '../../utils/toast.js';
 
-const STORAGE_KEY = 'pta3-initiative-tracker';
+const STORAGE_KEY = 'pta35-initiative-tracker';
 const STAT_KEYS = ['atk', 'def', 'satk', 'sdef', 'spd'];
 const STAT_LABELS = { atk: 'ATK', def: 'DEF', satk: 'SATK', sdef: 'SDEF', spd: 'SPD' };
 

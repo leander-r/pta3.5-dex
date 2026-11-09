@@ -8,7 +8,7 @@ import React from 'react';
 // deployment has replaced dist/ with freshly-hashed filenames — the old page (already
 // open, or loaded from a stale cache) is asking for a chunk that no longer exists.
 const CHUNK_ERROR_RE = /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed|Loading chunk [\w-]+ failed|ChunkLoadError/i;
-const CHUNK_RELOAD_KEY = 'pta3-chunk-reload-ts';
+const CHUNK_RELOAD_KEY = 'pta35-chunk-reload-ts';
 const CHUNK_RELOAD_COOLDOWN_MS = 10_000;
 const isChunkLoadError = (error) => CHUNK_ERROR_RE.test(error?.message || '');
 

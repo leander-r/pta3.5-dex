@@ -38,7 +38,7 @@ describe('ErrorBoundary — stale-chunk auto-reload', () => {
     });
 
     it('falls back to the error screen (no second reload) if the same chunk error recurs within the cooldown', () => {
-        sessionStorage.setItem('pta3-chunk-reload-ts', String(Date.now()));
+        sessionStorage.setItem('pta35-chunk-reload-ts', String(Date.now()));
 
         render(
             <ErrorBoundary>

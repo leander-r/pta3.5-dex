@@ -122,7 +122,7 @@ const BattleTab = () => {
     const [selectedSkill, setSelectedSkill] = useState('');
     const [customDice, setCustomDice] = useState('');
     const [rollHistory, setRollHistory] = useState(() => {
-        try { return JSON.parse(localStorage.getItem('pta3-roll-history') || '[]'); } catch (e) { console.warn('Roll history corrupted, resetting:', e); return []; }
+        try { return JSON.parse(localStorage.getItem('pta35-roll-history') || '[]'); } catch (e) { console.warn('Roll history corrupted, resetting:', e); return []; }
     });
     const [combatStages, setCombatStages] = useState({ atk: 0, satk: 0, def: 0, sdef: 0, spd: 0, acc: 0, eva: 0 });
     const [applyStab, setApplyStab] = useState(true);
@@ -256,7 +256,7 @@ const BattleTab = () => {
 
     useEffect(() => {
         try {
-            localStorage.setItem('pta3-roll-history', JSON.stringify(rollHistory));
+            localStorage.setItem('pta35-roll-history', JSON.stringify(rollHistory));
         } catch (e) {
             if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
                 toast.warning('Storage full — roll history could not be saved.');

@@ -6,14 +6,14 @@ export const _0x72 = atob('bGVhbmRlcl9yc3I='); // ownership marker
 
 export const DATA_CONFIG = {
     // GitHub raw URLs for data files
-    pokedexUrl: 'https://raw.githubusercontent.com/leander-r/pta3-dex/main/pokedex.min.json',
-    gameDataUrl: 'https://raw.githubusercontent.com/leander-r/pta3-dex/main/pta-game-data.min.json',
-    
-    // IndexedDB configuration — app-specific name prevents collision with pta-dex
-    // (both apps share the same origin leander-r.github.io)
-    dbName: 'PTA3Data',
+    pokedexUrl: 'https://raw.githubusercontent.com/leander-r/pta3.5-dex/main/pokedex.min.json',
+    gameDataUrl: 'https://raw.githubusercontent.com/leander-r/pta3.5-dex/main/pta-game-data.min.json',
+
+    // IndexedDB configuration — app-specific name prevents collision with pta-dex and
+    // pta3-dex (all three apps share the same origin leander-r.github.io)
+    dbName: 'PTA35Data',
     dbVersion: 2,
-    
+
     // Cache duration (7 days in milliseconds)
     cacheDuration: 7 * 24 * 60 * 60 * 1000
 };
@@ -22,7 +22,7 @@ export const DATA_CONFIG = {
 export const POKEDEX_CONFIG = {
     remoteUrl: DATA_CONFIG.pokedexUrl,
     fallbackEnabled: true,
-    dbName: 'PTA3Pokedex',
+    dbName: 'PTA35Pokedex',
     dbVersion: 1,
     storeName: 'pokedex',
     cacheDuration: DATA_CONFIG.cacheDuration
