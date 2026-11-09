@@ -8,7 +8,7 @@ export const HELP_CONTENT = {
         body: () => (
             <>
                 <p>Trainers have <strong>5 stats</strong> (ATK, DEF, SATK, SDEF, SPD) on a <strong>1–10 scale</strong>. Each stat has a <strong>modifier = ⌊stat ÷ 2⌋</strong> used in skill rolls and accuracy checks. HP is separate and fixed at 20 base.</p>
-                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Creation Point-Buy (25 pts)</h4>
+                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Creation Point-Buy (30 pts)</h4>
                 <ul style={{ paddingLeft: '18px', margin: '0 0 10px', lineHeight: '1.8' }}>
                     <li>Stat 1 = 1 pt &nbsp;|&nbsp; Stat 2 = 2 pts &nbsp;|&nbsp; Stat 3 = 3 pts</li>
                     <li>Stat 4 = 6 pts &nbsp;|&nbsp; Stat 5 = 8 pts &nbsp;|&nbsp; Stat 6 = 11 pts</li>
@@ -67,15 +67,18 @@ export const HELP_CONTENT = {
         title: 'Combat Stages',
         body: () => (
             <>
-                <p>Combat Stages track temporary <strong>stat buffs and debuffs</strong> applied by moves during battle.</p>
-                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Flat Stage Bonus</h4>
+                <p>Combat Stages track temporary <strong>buffs and debuffs</strong> applied by moves during battle.</p>
+                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>ATK / DEF / SATK / SDEF: Damage Dice, Not Stat</h4>
                 <ul style={{ paddingLeft: '18px', margin: '0 0 10px', lineHeight: '1.8' }}>
-                    <li><strong>+1 stage</strong> = +2 flat to the stat</li>
-                    <li><strong>−1 stage</strong> = −2 flat to the stat</li>
-                    <li>Example: ATK 8 at +3 stages → effective ATK 14</li>
+                    <li><strong>+1 stage</strong> = +1 damage die on the relevant attack</li>
+                    <li><strong>−1 stage</strong> = −1 damage die on the relevant attack</li>
+                    <li>Example: a move rolling 3d8 with Attack▲ rolls 4d8 instead — the stat itself doesn't change</li>
+                    <li>If stages remove every die, the move deals only its stat bonus + STAB</li>
                 </ul>
-                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Limits & Reset</h4>
-                <p>Stages range from <strong>−6 to +6</strong> (stat change: −12 to +12). They reset when the Pokémon switches out or the battle ends. Use the Reset button to clear all stages at once.</p>
+                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Speed: Still Flat to the Stat</h4>
+                <p>Speed is the one exception — each stage is still a flat <strong>±5</strong> to the Speed stat directly.</p>
+                <h4 style={{ margin: '14px 0 6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Stacking & Reset</h4>
+                <p>Same sign doesn't stack (Attack▲ + Attack▲ stays Attack▲); opposite signs cancel 1-for-1. Stages reset when the Pokémon switches out or the battle ends. Use the Reset button to clear all stages at once.</p>
             </>
         )
     },

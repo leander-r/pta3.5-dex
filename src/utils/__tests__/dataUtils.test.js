@@ -3,7 +3,8 @@ import {
     calcModifier,
     formatNumber,
     parseDice,
-    applyCombatStage,
+    applySpeedCombatStage,
+    getStageDiceDelta,
     applyNature,
     calculatePokemonHP,
     calculateSTAB,
@@ -64,25 +65,39 @@ describe('parseDice', () => {
     });
 });
 
-describe('applyCombatStage', () => {
-    it('returns base stat unchanged at stage 0', () => {
-        expect(applyCombatStage(10, 0)).toBe(10);
+describe('applySpeedCombatStage', () => {
+    it('returns base Speed unchanged at stage 0', () => {
+        expect(applySpeedCombatStage(10, 0)).toBe(10);
     });
 
-    it('adds 2 per positive stage at +1', () => {
-        expect(applyCombatStage(10, 1)).toBe(12);
+    it('adds 5 per positive stage at +1', () => {
+        expect(applySpeedCombatStage(10, 1)).toBe(15);
     });
 
-    it('adds 4 per positive stage at +2', () => {
-        expect(applyCombatStage(10, 2)).toBe(14);
+    it('adds 10 per positive stage at +2', () => {
+        expect(applySpeedCombatStage(10, 2)).toBe(20);
     });
 
-    it('subtracts 2 per negative stage at -1', () => {
-        expect(applyCombatStage(10, -1)).toBe(8);
+    it('subtracts 5 per negative stage at -1', () => {
+        expect(applySpeedCombatStage(10, -1)).toBe(5);
     });
 
-    it('subtracts 4 per negative stage at -2', () => {
-        expect(applyCombatStage(10, -2)).toBe(6);
+    it('subtracts 10 per negative stage at -2', () => {
+        expect(applySpeedCombatStage(10, -2)).toBe(0);
+    });
+});
+
+describe('getStageDiceDelta', () => {
+    it('returns 0 at stage 0', () => {
+        expect(getStageDiceDelta(0)).toBe(0);
+    });
+
+    it('returns +1 die per positive stage', () => {
+        expect(getStageDiceDelta(1)).toBe(1);
+    });
+
+    it('returns -1 die per negative stage', () => {
+        expect(getStageDiceDelta(-1)).toBe(-1);
     });
 });
 

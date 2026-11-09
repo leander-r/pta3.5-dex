@@ -103,8 +103,8 @@ const TrainerProfile = () => {
     const hpRollsPending = milestonesReached - (trainer.hpRolls || []).length;
     const statPointsPending = trainer.levelStatPoints || 0;
     // Note: unspent Creation points don't block Level 1 — the point-buy cost table's jumps
-    // mean some legitimate stat spreads can never land on exactly 0 remaining (HB1 caps the
-    // budget at 25, it doesn't require spending every last point).
+    // mean some legitimate stat spreads can never land on exactly 0 remaining (PHB1 caps the
+    // budget at 30, it doesn't require spending every last point).
     const canLevelUp = isLevel0
         ? hasClass
         : honorsMet && hpRollsPending === 0 && statPointsPending === 0;

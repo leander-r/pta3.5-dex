@@ -90,15 +90,22 @@ export const buildPokemonEmbed = (roll, trainerName) => {
             const s = i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th';
             return `${i}${s}`;
         };
-        const stageStr = roll.relevantStages.filter(s => s.stage != null && s.stage !== 0).map(({ label, stage, bonus, base, boosted, isFlat }) => {
+        const stageStr = roll.relevantStages.filter(s => s.stage != null && s.stage !== 0).map(({ label, stage, bonus, base, boosted, isFlat, isDice, diceDelta }) => {
             const stageNum  = Number(stage);
             const abs       = Math.abs(stageNum);
             const sign      = stageNum >= 0 ? '+' : '−';
-            const bonusSign = bonus >= 0 ? '+' : '−';
-            const bonusAbs  = Math.abs(bonus);
             if (isFlat) {
+                const bonusSign = bonus >= 0 ? '+' : '−';
+                const bonusAbs  = Math.abs(bonus);
                 return `**${label}** ${sign}${ordinal(abs)} Combat Stage = ${bonusSign}${bonusAbs} to roll`;
             }
+            if (isDice) {
+                const deltaSign = diceDelta >= 0 ? '+' : '−';
+                const deltaAbs  = Math.abs(diceDelta);
+                return `**${label}** ${sign}${ordinal(abs)} Combat Stage = ${deltaSign}${deltaAbs} damage ${deltaAbs === 1 ? 'die' : 'dice'}`;
+            }
+            const bonusSign = bonus >= 0 ? '+' : '−';
+            const bonusAbs  = Math.abs(bonus);
             return `**${label}** ${sign}${ordinal(abs)} Combat Stage = ${base} ${bonusSign} ${bonusAbs} = **${boosted}**`;
         }).join('\n');
         fields.push({ name: '📊 Combat Stages', value: stageStr, inline: false });

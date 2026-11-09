@@ -3,7 +3,7 @@
 // ============================================================
 
 import { GAME_DATA } from '../data/configs.js';
-import { COMBAT_STAGE_FLAT_PER_STAGE, STAB_BONUS, POINT_BUY_COSTS } from '../data/constants.js';
+import { SPEED_STAGE_FLAT_PER_STAGE, STAB_BONUS, POINT_BUY_COSTS } from '../data/constants.js';
 
 /**
  * Calculate stat modifier (PTA3: ⌊stat / 2⌋)
@@ -43,33 +43,37 @@ export const applyNature = (baseStats, nature) => {
 };
 
 /**
- * Calculate Combat Stage modifier for a stat (PTA3: flat +2 per stage)
- * Range: -6 to +6 maps to -12 to +12 on the stat
+ * Apply a Speed combat stage to the Speed stat (PTA3.5: flat ±5 per stage).
+ * Speed is the only stat whose combat stages still modify the stat value directly — RAW:
+ * "For each Speed▲ your Speed stat is +5. For each Speed▼ your Speed stat is -5."
+ * Attack, Defense, Special Attack, and Special Defense stages no longer touch the stat at all;
+ * see `getStageDiceDelta` for those.
  */
-export const applyCombatStage = (baseStat, stages) => {
-    if (stages === 0) return baseStat;
-    return (baseStat || 0) + stages * COMBAT_STAGE_FLAT_PER_STAGE;
+export const applySpeedCombatStage = (baseSpeed, stages) => {
+    if (!stages) return baseSpeed || 0;
+    return (baseSpeed || 0) + stages * SPEED_STAGE_FLAT_PER_STAGE;
 };
 
 /**
- * Get combat stage flat change display
+ * Get Speed combat stage flat change display (e.g. "+5", "-10")
  */
-export const getCombatStagePercent = (stages) => {
-    if (stages === 0) return '+0';
-    return (stages > 0 ? '+' : '') + (stages * COMBAT_STAGE_FLAT_PER_STAGE);
+export const getSpeedCombatStageDelta = (stages) => {
+    if (!stages) return '+0';
+    return (stages > 0 ? '+' : '') + (stages * SPEED_STAGE_FLAT_PER_STAGE);
 };
 
 /**
- * Calculate Speed Skill modifier from combat stages
- * +1 per 2 positive stages, -1 per 3 negative stages (min 1)
+ * Convert an Attack/Defense/Special Attack/Special Defense combat stage into a damage-dice delta
+ * (PTA3.5). Each stage of the attacker's own Attack/SpAttack adds (▲) or removes (▼) one damage
+ * die from their own attacks; RAW also has the target's opposing Defense/SpDefense stage
+ * contribute a die the same way (Defense▼ on the target adds a die, Defense▲ removes one), but
+ * this tool only tracks stages for whichever single Pokémon is selected — it has never modeled an
+ * opposing target's stat separately, even under the old flat-stat rules (Defense/SpDefense stages
+ * were tracked in combat-stage state but were never read by the damage roll). If target-side
+ * Defense/SpDefense needs to factor into a roll, add/subtract it into `stages` manually before
+ * calling this.
  */
-export const getSpeedSkillMod = (spdStages) => {
-    if (spdStages >= 0) {
-        return Math.floor(spdStages / 2);
-    } else {
-        return -Math.floor(Math.abs(spdStages) / 3);
-    }
-};
+export const getStageDiceDelta = (stages) => stages || 0;
 
 /**
  * Calculate STAB bonus (PTA3: fixed +4, no level scaling)

@@ -37,19 +37,27 @@ describe('CombatStagesPanel', () => {
         expect(screen.getByText('Reset All Stages')).toBeInTheDocument();
     });
 
-    it('applies flat +2 per stage to a real stat (PTA3 rule)', () => {
+    it('shows ATK/DEF/SATK/SDEF stages as damage dice, not a stat change (PTA3.5 rule)', () => {
         renderPanel({ combatStages: { atk: 2 } });
         fireEvent.click(screen.getByRole('button', { name: /show combat stages/i }));
-        // atk base 10, +2 stages * 2 = +4 -> 14
+        // atk stages don't touch the stat anymore — they add damage dice, 1:1 with stage count
         const atkBox = screen.getByText('ATK').closest('.combat-stat-box');
-        expect(within(atkBox).getByText('14')).toBeInTheDocument();
+        expect(within(atkBox).getByText(/dice:/)).toHaveTextContent('dice: +2');
     });
 
-    it('applies flat -2 per negative stage', () => {
+    it('shows negative stages as removed damage dice', () => {
         renderPanel({ combatStages: { def: -1 } });
         fireEvent.click(screen.getByRole('button', { name: /show combat stages/i }));
         const defBox = screen.getByText('DEF').closest('.combat-stat-box');
-        expect(within(defBox).getByText('6')).toBeInTheDocument(); // 8 - 2
+        expect(within(defBox).getByText(/dice:/)).toHaveTextContent('dice: -1');
+    });
+
+    it('applies flat ±5 per stage to Speed (the one stat stages still modify directly)', () => {
+        renderPanel({ combatStages: { spd: 2 } });
+        fireEvent.click(screen.getByRole('button', { name: /show combat stages/i }));
+        // spd base 14, +2 stages * 5 = +10 -> 24
+        const spdBox = screen.getByText('SPD').closest('.combat-stat-box');
+        expect(within(spdBox).getByText('24')).toBeInTheDocument();
     });
 
     it('shows ACC/EVA as a flat modifier (no base stat math)', () => {

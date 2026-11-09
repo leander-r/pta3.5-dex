@@ -4,7 +4,7 @@
 // Dice roller state and functions for PTA combat
 
 import { useState, useCallback } from 'react';
-import { calculateSTAB, getActualStats, calculatePokemonHP, parseDice, parseCritThreshold, applyCombatStage, calcModifier } from '../utils/dataUtils.js';
+import { calculateSTAB, getActualStats, calculatePokemonHP, parseDice, parseCritThreshold, getStageDiceDelta, calcModifier } from '../utils/dataUtils.js';
 import { GAME_DATA } from '../data/configs.js';
 
 /**
@@ -87,9 +87,15 @@ export const useDiceRoller = (sendToDiscord = null) => {
         const statKey = isPhysical ? 'atk' : 'satk';
         const baseStat = actualStats[statKey] || 0;
 
-        // Apply combat stages (PTA3: flat +2 per stage)
+        // PTA3.5: the stat bonus to damage is always half the stat, rounded down — combat
+        // stages no longer change the stat itself, they change the dice rolled (below).
+        const modifier = calcModifier(baseStat);
+
+        // PTA3.5: each stage of the attacker's own Attack/SpAttack adds (▲) or removes (▼) one
+        // damage die (RAW also has the target's opposing Defense/SpDefense stage contribute a
+        // die the same way — not modeled here, see getStageDiceDelta's doc comment).
         const stages = state.combatStages[statKey] || 0;
-        const statMod = applyCombatStage(baseStat, stages);
+        const stageDiceDelta = getStageDiceDelta(stages);
 
         // Roll accuracy (1d20); check move-specific crit threshold
         const accRoll = Math.floor(Math.random() * 20) + 1;
@@ -121,24 +127,35 @@ export const useDiceRoller = (sendToDiscord = null) => {
         let rolls, diceTotal, total, stabBonus = 0, diceLabel;
 
         if (diceData.flat > 0) {
-            // Flat damage move (e.g. Dragon Rage): fixed value, no bonuses
+            // Fixed Damage move (e.g. Dragon Rage): exact value, no dice/stat/STAB bonuses (RAW)
             rolls = [diceData.flat];
             diceTotal = diceData.flat;
             total = diceData.flat;
             diceLabel = `${diceData.flat} (fixed)`;
         } else {
-            const diceCount = diceData.count;
-            // PTA3: critical hit = all dice at max value (not double dice)
-            rolls = isCrit
-                ? Array(diceCount).fill(diceData.sides)
-                : rollDice(diceCount, diceData.sides);
-            diceTotal = rolls.reduce((sum, r) => sum + r, 0);
-
             if (applyStab && pokemon.types && pokemon.types.includes(move.type)) {
                 stabBonus = calculateSTAB();
             }
-            total = diceTotal + diceData.bonus + statMod + stabBonus;
-            diceLabel = `${diceCount}d${diceData.sides}${diceData.bonus ? '+' + diceData.bonus : ''}`;
+
+            // PTA3.5: combat stages add/remove whole dice before rolling. If a stage removes
+            // every die the move has, it deals only its flat modifiers (stat bonus + STAB) — no
+            // dice rolled.
+            const diceCount = Math.max(0, diceData.count + stageDiceDelta);
+
+            if (diceCount === 0) {
+                rolls = [];
+                diceTotal = 0;
+                total = diceData.bonus + modifier + stabBonus;
+                diceLabel = `0 dice (stages removed all power)`;
+            } else {
+                // PTA3.5: critical hit = all dice at max value (not double dice)
+                rolls = isCrit
+                    ? Array(diceCount).fill(diceData.sides)
+                    : rollDice(diceCount, diceData.sides);
+                diceTotal = rolls.reduce((sum, r) => sum + r, 0);
+                total = diceTotal + diceData.bonus + modifier + stabBonus;
+                diceLabel = `${diceCount}d${diceData.sides}${diceData.bonus ? '+' + diceData.bonus : ''}`;
+            }
         }
 
         const result = {
@@ -150,7 +167,8 @@ export const useDiceRoller = (sendToDiscord = null) => {
             dice: diceLabel,
             rolls,
             diceTotal,
-            statBonus: diceData.flat > 0 ? 0 : statMod,
+            statBonus: diceData.flat > 0 ? 0 : modifier,
+            stageDiceDelta: diceData.flat > 0 ? 0 : stageDiceDelta,
             stabBonus,
             accRoll,
             isCrit,

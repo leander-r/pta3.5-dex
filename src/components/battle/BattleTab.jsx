@@ -4,7 +4,7 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { getTypeColor, getContrastTextColor } from '../../utils/typeUtils.js';
-import { calculateSTAB, getActualStats, calculatePokemonHP, parseDice, applyCombatStage, parseHealFormula, parseCritThreshold, calcModifier } from '../../utils/dataUtils.js';
+import { calculateSTAB, getActualStats, calculatePokemonHP, parseDice, getStageDiceDelta, parseHealFormula, parseCritThreshold, calcModifier } from '../../utils/dataUtils.js';
 import toast from '../../utils/toast.js';
 import { useGameData, useModal, useTrainerContext, usePokemonContext, useData, useUI } from '../../contexts/index.js';
 import { MAX_ROLL_HISTORY, MAX_MOVE_TABLE, Z_MOVE_TABLE, TERA_CROWN_TABLE } from '../../data/constants.js';
@@ -442,7 +442,7 @@ const BattleTab = () => {
     const handleTeraRevert = () => setIsTerastallized(false);
 
     // Roll a special mechanic move (Z-Move, G-Max, Tera Blast) into roll history.
-    // PTA3's general damage formula is "Dice + modifier + STAB + type bonus" for every
+    // PTA3.5's general damage formula is "Dice + modifier + STAB + type bonus" for every
     // Physical/Special attack (GameRulesSection.jsx) — nothing exempts these from it, and
     // Tera Blast's own text is explicit: "you may use your Attack stat instead of your
     // Special Attack stat when rolling to hit and calculating damage" (gmg_raw.txt ~12928-12932).
@@ -455,15 +455,20 @@ const BattleTab = () => {
         const actualStats = getStatsWithMega(selectedPokemon);
         let statKey = statKeyOverride || (category === 'Physical' ? 'atk' : 'satk');
         if (statKey === 'higher') {
-            const atkAdj = applyCombatStage(actualStats.atk || 0, combatStages.atk || 0);
-            const satkAdj = applyCombatStage(actualStats.satk || 0, combatStages.satk || 0);
-            statKey = atkAdj >= satkAdj ? 'atk' : 'satk';
+            // PTA3.5: combat stages no longer change the stat itself (they add/remove dice), so
+            // "currently higher" compares the raw stat — temporary stage buffs aren't commensurable
+            // with a stat-value comparison anymore.
+            statKey = (actualStats.atk || 0) >= (actualStats.satk || 0) ? 'atk' : 'satk';
         }
-        const adjustedStat = applyCombatStage(actualStats[statKey] || 0, combatStages[statKey] || 0);
-        const statMod = calcModifier(adjustedStat);
+        // PTA3.5: the stat bonus to damage is always half the stat, rounded down — stages don't
+        // touch the stat. Each stage of the attacker's own Attack/SpAttack instead adds/removes a
+        // damage die (below).
+        const statMod = calcModifier(actualStats[statKey] || 0);
+        const stageDiceDelta = getStageDiceDelta(combatStages[statKey] || 0);
         const stabBonus = (applyStab && (forceStab || selectedPokemon.types?.includes(moveType))) ? calculateSTAB() : 0;
 
-        const rolls = rollDice(diceData.count, diceData.sides);
+        const diceCount = Math.max(0, diceData.count + stageDiceDelta);
+        const rolls = diceCount > 0 ? rollDice(diceCount, diceData.sides) : [];
         const diceTotal = rolls.reduce((s, r) => s + r, 0);
         const total = diceTotal + diceData.bonus + statMod + stabBonus;
         const hp = getActivePokemonHP(selectedPokemon);
@@ -472,7 +477,7 @@ const BattleTab = () => {
             move: moveName, moveType, category,
             accRoll: 20, accModifier: 0, modifiedAccRoll: 20, moveAC: null, acWasOverridden: false,
             isHit: true, isCrit: false, isStatus: false,
-            dice: `${diceData.count}d${diceData.sides}`,
+            dice: diceCount > 0 ? `${diceCount}d${diceData.sides}` : '0 dice (stages removed all power)',
             rolls, diceTotal, diceBonus: diceData.bonus, statBonus: statMod, stabBonus, total,
             typeColor: 0,
             attackerCurrentHP: hp.current, attackerMaxHP: hp.max,
@@ -592,9 +597,11 @@ const BattleTab = () => {
         const statKey = isPhysical ? 'atk' : 'satk'; // stat used for damage
         // PTA3: Physical → ATK accuracy mod vs DEF; Special → SATK mod vs SDEF; Status → EFF mod vs SPD
         const accModKey = isPhysical ? 'atk' : category === 'Status' ? 'eff' : 'satk';
-        // PTA3: combat stages adjust the full stat; damage modifier = ⌊adjusted_stat/2⌋
-        const adjustedStat = applyCombatStage(actualStats[statKey] || 0, combatStages[statKey] || 0);
-        const statMod = calcModifier(adjustedStat);
+        // PTA3.5: combat stages no longer adjust the stat — damage modifier is always
+        // ⌊stat/2⌋. Each stage of the attacker's own Attack/SpAttack instead adds/removes a
+        // damage die (applied to diceCount below).
+        const statMod = calcModifier(actualStats[statKey] || 0);
+        const stageDiceDelta = getStageDiceDelta(combatStages[statKey] || 0);
 
         // PTA3: accuracy = 1d20 + acc combat stages + Pokémon's accuracy bonus (from Pokédex)
         const accStageMod = combatStages.acc || 0;
@@ -626,11 +633,9 @@ const BattleTab = () => {
 
         // Collect non-zero combat stages relevant to this roll
         const statLabel = isPhysical ? 'ATK' : 'SATK';
-        const baseStatVal = actualStats[statKey] || 0;
-        const stageBonus = adjustedStat - baseStatVal; // raw stat change from combat stages
         const relevantStages = [
             combatStages.acc ? { label: 'ACC', stage: combatStages.acc, bonus: combatStages.acc, isFlat: true } : null,
-            diceData.count > 0 && combatStages[statKey] ? { label: statLabel, stage: combatStages[statKey], bonus: stageBonus, base: baseStatVal, boosted: adjustedStat } : null,
+            diceData.count > 0 && combatStages[statKey] ? { label: statLabel, stage: combatStages[statKey], diceDelta: stageDiceDelta, isDice: true } : null,
         ].filter(Boolean);
 
         if (diceData.count === 0 && diceData.flat === 0) {
@@ -641,27 +646,35 @@ const BattleTab = () => {
         let rolls = [], diceTotal = 0, stabBonus = 0, total = 0, diceCount = 0;
         if (isHit) {
             if (diceData.flat > 0) {
-                // Flat damage move (e.g. Dragon Rage): fixed value, no dice, no added bonuses
+                // Fixed Damage move (e.g. Dragon Rage): exact value, no dice/stat/STAB bonuses (RAW)
                 rolls = [diceData.flat];
                 diceTotal = diceData.flat;
                 total = diceData.flat;
             } else {
-                diceCount = diceData.count;
-                // PTA3: critical hit = all dice at max value (not double dice)
-                rolls = isCrit
-                    ? Array(diceCount).fill(diceData.sides)
-                    : rollDice(diceCount, diceData.sides);
-                diceTotal = rolls.reduce((sum, r) => sum + r, 0);
                 if (applyStab && selectedPokemon.types?.includes(selectedMove.type)) {
                     stabBonus = calculateSTAB();
                 }
-                total = diceTotal + diceData.bonus + statMod + stabBonus;
+                // PTA3.5: combat stages add/remove whole dice before rolling. If a stage removes
+                // every die the move has, it deals only its flat modifiers (stat bonus + STAB).
+                diceCount = Math.max(0, diceData.count + stageDiceDelta);
+                if (diceCount === 0) {
+                    rolls = [];
+                    diceTotal = 0;
+                    total = diceData.bonus + statMod + stabBonus;
+                } else {
+                    // PTA3.5: critical hit = all dice at max value (not double dice)
+                    rolls = isCrit
+                        ? Array(diceCount).fill(diceData.sides)
+                        : rollDice(diceCount, diceData.sides);
+                    diceTotal = rolls.reduce((sum, r) => sum + r, 0);
+                    total = diceTotal + diceData.bonus + statMod + stabBonus;
+                }
             }
         }
 
         addToHistory(buildPokemonRollEntry({
             ...commonFields,
-            dice: isHit ? (diceData.flat > 0 ? `${diceData.flat} (fixed)` : `${diceCount}d${diceData.sides}`) : null,
+            dice: isHit ? (diceData.flat > 0 ? `${diceData.flat} (fixed)` : (diceCount > 0 ? `${diceCount}d${diceData.sides}` : '0 dice (stages removed all power)')) : null,
             diceBonus: diceData.bonus,
             rolls, diceTotal, statBonus: diceData.flat > 0 ? 0 : statMod, stabBonus, total, relevantStages
         }));

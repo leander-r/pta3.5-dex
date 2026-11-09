@@ -1,5 +1,5 @@
 // ============================================================
-// Game Rules Section Component (PTA3)
+// Game Rules Section Component (PTA3.5)
 // ============================================================
 
 import React, { useState } from 'react';
@@ -62,6 +62,35 @@ const GameRulesSection = () => {
             )
         },
         {
+            id: 'keywords',
+            title: 'Move Keywords',
+            content: (
+                <div>
+                    <p style={{ marginBottom: '10px' }}>Shorthand tags on moves for mechanics that are easier to reference once than spell out every time.</p>
+                    <h4>Lethal <span style={{ fontWeight: 'normal', color: '#888' }}>(new in 3.5)</span></h4>
+                    <p>Scores a Critical Hit on a natural <strong>19 or 20</strong> instead of just 20 — but only once per combat. If you roll a 19 again after already using the upgrade, you can choose not to count it as a crit.</p>
+                    <h4>Latched <span style={{ fontWeight: 'normal', color: '#888' }}>(new in 3.5)</span></h4>
+                    <p>A bite-based effect. Staying adjacent to the Pokémon that Latched you avoids a penalty on your next turn; moving away triggers one (usually an Affliction or extra harm). Ends automatically after the Latched creature acts.</p>
+                    <h4>Stance <span style={{ fontWeight: 'normal', color: '#888' }}>(new in 3.5)</span></h4>
+                    <p>Marks a move as granting a persistent passive-while-active state (e.g. heal each turn, punish melee attackers). Only one Stance can be active at a time — using another move with Stance, or a different Stance effect, replaces it.</p>
+                    <h4>Priority</h4>
+                    <p>Lets the user act first during the round. If multiple Pokémon use Priority moves the same round, whoever has higher Speed goes first among them.</p>
+                    <h4>Reaction</h4>
+                    <p>Can be used out of turn order on a specific trigger, including during another character's turn — but using one counts as that round's command, and interrupts the current turn until it resolves.</p>
+                    <h4>Recharge</h4>
+                    <p>The user can't move or act on the following round. They can still be recalled to a Poké Ball or have a medicine item used on them.</p>
+                    <h4>Multi-Turn</h4>
+                    <p>Takes more than one turn to complete. The user can't use other moves, declare Priority, or have medicine items used on them while it's in progress — but a trainer can still command other Pokémon on the intervening turns.</p>
+                    <h4>Scatter</h4>
+                    <p>Targets multiple Pokémon, or the same Pokémon multiple times, each with a separate Accuracy Check (Scatter 3 or Scatter 5). Type-effectiveness, Stat ▲/▼, and STAB only apply once per turn, not per hit.</p>
+                    <h4>Coat</h4>
+                    <p>A status effect placed onto a Pokémon that persists until they're recalled or leave combat for a minute. A newer Coat's effect overrides an older, conflicting one.</p>
+                    <h4>Hazards</h4>
+                    <p>Placed in an area of effect and affect anyone who enters; fade after about a minute outside combat.</p>
+                </div>
+            )
+        },
+        {
             id: 'hp',
             title: 'HP & Recovery',
             content: (
@@ -95,10 +124,11 @@ const GameRulesSection = () => {
                     </ul>
 
                     <h4>Combat Stages</h4>
-                    <p>Each stage = <strong>+2 flat</strong> to the stat (both + and −).</p>
+                    <p>ATK / DEF / SATK / SDEF stages don't touch the stat — each stage adds (▲) or removes (▼) <strong>1 damage die</strong> on the relevant attack instead. Speed is the exception: each stage is still a flat <strong>±5</strong> to the Speed stat.</p>
                     <ul>
-                        <li>Range: −6 to +6 stages → stat changes by −12 to +12</li>
-                        <li>Example: ATK 8, +3 stages → effective ATK 14</li>
+                        <li>Example: a move rolling 3d8 with Attack▲ rolls 4d8 instead</li>
+                        <li>Same sign doesn't stack (Attack▲ + Attack▲ stays Attack▲); opposite signs cancel 1-for-1</li>
+                        <li>If stages remove every die a move has, it deals only its stat bonus + STAB (no dice)</li>
                         <li>ACC / EVA stages are pure modifiers added to/subtracted from rolls</li>
                     </ul>
                 </div>
@@ -112,7 +142,7 @@ const GameRulesSection = () => {
                     <h4>Character Creation</h4>
                     <ul>
                         <li>5 stats (ATK, DEF, SATK, SDEF, SPD) — no HP stat</li>
-                        <li>Point-buy budget: <strong>25 points</strong></li>
+                        <li>Point-buy budget: <strong>30 points</strong></li>
                         <li>Cumulative cost to reach: 1=1pt | 2=2pt | 3=3pt | 4=6pt | 5=8pt | 6=11pt</li>
                         <li>Max stat at creation: <strong>6</strong> — can reach 10 via level-up (flat 1pt per +1)</li>
                     </ul>
@@ -140,9 +170,9 @@ const GameRulesSection = () => {
 
     return (
         <div>
-            <h3>Game Rules Quick Reference (PTA3)</h3>
+            <h3>Game Rules Quick Reference (PTA3.5)</h3>
             <p style={{ marginBottom: '15px', fontSize: '13px', color: '#666' }}>
-                Essential rules for Pokémon Tabletop Adventures 3rd Edition.
+                Essential rules for Pokémon Tabletop Adventures 3.5.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

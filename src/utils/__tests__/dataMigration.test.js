@@ -107,15 +107,15 @@ describe('migrateSaveData', () => {
         expect(data.trainers[0].honors).toBe(0);
     });
 
-    it('caps statPoints at 25 (PTA3 creation budget) but keeps a lower existing value', () => {
+    it('caps statPoints at 30 (PTA3.5 creation budget) but keeps a lower existing value', () => {
         const over = migrateSaveData({ trainers: [{ stats: { hp: 10 }, statPoints: 999 }] });
-        expect(over.data.trainers[0].statPoints).toBe(25);
+        expect(over.data.trainers[0].statPoints).toBe(30);
 
         const under = migrateSaveData({ trainers: [{ stats: { hp: 10 }, statPoints: 4 }] });
         expect(under.data.trainers[0].statPoints).toBe(4);
 
         const missing = migrateSaveData({ trainers: [{ stats: { hp: 10 } }] });
-        expect(missing.data.trainers[0].statPoints).toBe(25);
+        expect(missing.data.trainers[0].statPoints).toBe(30);
     });
 
     it('resets classLevels to {} (re-derived elsewhere from trainer.level)', () => {
@@ -256,11 +256,11 @@ describe('cleanupLegacyFeatures', () => {
 
 describe('fixStatPointAccounting', () => {
     it('recomputes statPoints from absolute point-buy cost for a Level 0 trainer', () => {
-        // 3/3/3/3/3 costs 5 * 3 = 15 of the 25-pt budget -> 10 remaining
-        const data = { trainers: [{ level: 0, stats: { atk: 3, def: 3, satk: 3, sdef: 3, spd: 3 }, statPoints: 25 }] };
+        // 3/3/3/3/3 costs 5 * 3 = 15 of the 30-pt budget -> 15 remaining
+        const data = { trainers: [{ level: 0, stats: { atk: 3, def: 3, satk: 3, sdef: 3, spd: 3 }, statPoints: 30 }] };
         const result = fixStatPointAccounting(data);
         expect(result.fixed).toBe(true);
-        expect(result.data.trainers[0].statPoints).toBe(10);
+        expect(result.data.trainers[0].statPoints).toBe(15);
     });
 
     it('leaves trainers above Level 0 untouched', () => {
@@ -271,7 +271,7 @@ describe('fixStatPointAccounting', () => {
     });
 
     it('is idempotent once statPoints already matches the correct value', () => {
-        const data = { trainers: [{ level: 0, stats: { atk: 3, def: 3, satk: 3, sdef: 3, spd: 3 }, statPoints: 10 }] };
+        const data = { trainers: [{ level: 0, stats: { atk: 3, def: 3, satk: 3, sdef: 3, spd: 3 }, statPoints: 15 }] };
         const result = fixStatPointAccounting(data);
         expect(result.fixed).toBe(false);
         expect(result.data).toBe(data);
@@ -279,7 +279,7 @@ describe('fixStatPointAccounting', () => {
 
     it('never produces a negative remaining-points value when overspent', () => {
         const data = { trainers: [{ level: 0, stats: { atk: 6, def: 6, satk: 6, sdef: 6, spd: 6 }, statPoints: 0 }] };
-        // 5 * 11 = 55 cost, far over the 25-pt budget
+        // 5 * 11 = 55 cost, far over the 30-pt budget
         const result = fixStatPointAccounting(data);
         expect(result.data.trainers[0].statPoints).toBe(0);
     });
