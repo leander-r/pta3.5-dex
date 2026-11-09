@@ -32,7 +32,7 @@ const sections = [
     { label: 'Natures', heading: /Nature Effects/ },
     { label: 'Moves Database', heading: /Moves Database/ },
     { label: 'Abilities', heading: /Abilities Database/ },
-    { label: 'Game Rules', heading: 'Game Rules Quick Reference (PTA3)' },
+    { label: 'Game Rules', heading: 'Game Rules Quick Reference (PTA3.5)' },
     { label: 'Honor Thresholds', heading: 'Trainer Level — Honor Thresholds' },
     { label: 'Custom Content', heading: 'Custom Content' },
 ];
